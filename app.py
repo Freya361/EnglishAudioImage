@@ -1,13 +1,14 @@
 import os
 import io
 import re
+import zipfile
 import threading
 import subprocess
 from dotenv import load_dotenv
 load_dotenv()
 
 import numpy as np
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file
 from PIL import Image, ImageDraw, ImageFont
 from gtts import gTTS
 from pydub import AudioSegment
@@ -331,6 +332,31 @@ def generate():
         "filename":    base,
         **file_urls(base),
     })
+
+
+@app.route("/zip/<int:idx>")
+def download_zip(idx):
+    entries = parse_phrases_md()
+    if not (0 <= idx < len(entries)):
+        return jsonify({"error": "Invalid index."}), 404
+
+    entry = entries[idx]
+    base  = safe_filename(entry["number"], entry["phrase"])
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        for ext in ("png", "mp3", "mp4"):
+            path = os.path.join(GENERATED_DIR, f"{base}.{ext}")
+            if os.path.exists(path):
+                zf.write(path, f"{base}.{ext}")
+    buf.seek(0)
+
+    return send_file(
+        buf,
+        mimetype="application/zip",
+        as_attachment=True,
+        download_name=f"{base}.zip",
+    )
 
 
 if __name__ == "__main__":

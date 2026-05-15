@@ -329,6 +329,12 @@
       prependResult(idx, data);
       markDone(idx);
 
+      // Auto-download zip of image + audio + video
+      const a = Object.assign(document.createElement("a"), {
+        href: `/zip/${idx}`, download: `${data.filename}.zip`,
+      });
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+
     } catch (err) {
       showError(err.message);
       document.querySelector(`[data-index="${idx}"]`).classList.remove("loading", "active");
