@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(New-Item -ItemType Directory -Force \"d:\\\\Source Code\\\\EnglishAudioImage\\\\templates\")",
+      "PowerShell(if \\($env:ANTHROPIC_API_KEY\\) { \"API key is set\" } else { \"API key NOT found — set ANTHROPIC_API_KEY before running\" })",
+      "PowerShell(if \\($env:ANTHROPIC_API_KEY\\) { \"API key is set\" } else { \"API key NOT found �� set ANTHROPIC_API_KEY before running\" })",
+      "PowerShell(pip install google-generativeai --quiet)",
+      "PowerShell(python -c \"import google.generativeai as genai; print\\('OK:', genai.__version__\\)\")",
+      "PowerShell(pip install google-genai --quiet)",
+      "PowerShell(python -c \"from google import genai; print\\('google-genai OK'\\)\")",
+      "PowerShell(netstat -ano)",
+      "PowerShell(python -c \"from pydub import AudioSegment; print\\('pydub OK'\\)\" 2>&1)",
+      "PowerShell(ffmpeg -version 2>&1)",
+      "PowerShell(pip install pydub --quiet)",
+      "PowerShell(python -c \"from pydub import AudioSegment; print\\('pydub OK'\\)\")",
+      "PowerShell(New-Item -ItemType Directory -Force \"d:\\\\Source Code\\\\EnglishAudioImage\\\\static\\\\generated\")"
+    ]
+  }
+}

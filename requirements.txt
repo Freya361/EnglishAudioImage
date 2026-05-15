@@ -1,0 +1,6 @@
+flask
+google-genai
+pillow
+gtts
+python-dotenv
+pydub

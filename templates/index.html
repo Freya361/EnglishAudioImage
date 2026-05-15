@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>English Phrase Cards</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0b0f1c;
+      --surface: #111827;
+      --surface2:#1a2340;
+      --border:  #1e2b4a;
+      --accent:  #6366f1;
+      --accenth: #818cf8;
+      --gold:    #facc15;
+      --text:    #e2e8f0;
+      --muted:   #64748b;
+      --danger:  #ef4444;
+      --green:   #22c55e;
+      --radius:  12px;
+    }
+
+    html, body { height: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    header {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      padding: 14px 24px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    header h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accenth), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header span { color: var(--muted); font-size: .85rem; margin-left: auto; }
+
+    .layout { flex: 1; display: flex; overflow: hidden; }
+
+    /* ── Left panel ── */
+    .phrase-list {
+      width: 300px;
+      flex-shrink: 0;
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      background: var(--surface);
+    }
+    .phrase-list::-webkit-scrollbar { width: 6px; }
+    .phrase-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .phrase-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 18px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background .15s;
+      user-select: none;
+    }
+    .phrase-item:hover   { background: var(--surface2); }
+    .phrase-item.active  { background: #1e2b5a; border-left: 3px solid var(--accent); }
+    .phrase-item.loading { pointer-events: none; opacity: .55; }
+
+    .phrase-num {
+      flex-shrink: 0;
+      width: 30px; height: 30px;
+      background: #2e3a6e;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .75rem; font-weight: 700; color: var(--accenth);
+    }
+    .phrase-item.active .phrase-num { background: var(--accent); color: #fff; }
+    .phrase-item.done   .phrase-num { background: #14532d; color: var(--green); }
+
+    .phrase-meta { overflow: hidden; flex: 1; }
+    .phrase-name {
+      font-size: .88rem; font-weight: 600;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .phrase-trans {
+      font-size: .73rem; color: var(--muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+    .done-badge { flex-shrink: 0; font-size: .7rem; color: var(--green); display: none; }
+    .phrase-item.done .done-badge { display: block; }
+
+    /* ── Right panel ── */
+    .result-panel {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .result-panel::-webkit-scrollbar { width: 6px; }
+    .result-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .spinner-wrap {
+      display: none;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 24px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      font-size: .9rem;
+      flex-shrink: 0;
+    }
+    .spinner {
+      flex-shrink: 0;
+      width: 20px; height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+    .empty-icon { font-size: 2.8rem; opacity: .35; }
+
+    .error-box {
+      margin: 16px 24px 0;
+      background: #1f0707;
+      border: 1px solid var(--danger);
+      border-radius: var(--radius);
+      color: #fca5a5;
+      padding: 12px 16px;
+      font-size: .88rem;
+      display: none;
+    }
+
+    /* ── Result blocks ── */
+    #results-container { display: flex; flex-direction: column; }
+
+    .result-block {
+      border-bottom: 2px solid var(--border);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .result-block-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+    .result-phrase { font-size: 1.25rem; font-weight: 700; color: var(--gold); }
+    .result-trans  { font-size: .88rem; color: #93c5fd; margin-top: 3px; }
+    .result-num {
+      font-size: .75rem; color: var(--muted);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 10px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+    }
+    .card-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .card-title {
+      font-size: .72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em;
+      color: var(--muted);
+    }
+
+    img.phrase-img   { width: 100%; border-radius: 8px; display: block; }
+    video.phrase-vid { width: 100%; border-radius: 8px; display: block; background: #000; }
+    audio            { width: 100%; accent-color: var(--accent); border-radius: 6px; }
+
+    .btn {
+      cursor: pointer; border: none; border-radius: 8px;
+      font-size: .82rem; font-weight: 600; padding: 7px 16px;
+      transition: opacity .15s, transform .1s;
+    }
+    .btn:active { transform: scale(.97); }
+    .btn-dl {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-dl:hover { border-color: var(--accent); color: var(--accenth); }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>English Phrase Cards</h1>
+  <span id="count-label"></span>
+</header>
+
+<div class="layout">
+  <div class="phrase-list" id="phrase-list"></div>
+
+  <div class="result-panel">
+    <div class="spinner-wrap" id="spinner">
+      <div class="spinner"></div>
+      <span id="spinner-msg">Generating…</span>
+    </div>
+
+    <div class="error-box" id="error-box"></div>
+
+    <div class="empty-state" id="empty-state">
+      <div class="empty-icon">📖</div>
+      <div>Select a phrase to generate its card, audio and video</div>
+    </div>
+
+    <div id="results-container"></div>
+  </div>
+</div>
+
+<script>
+  // idx → server response object (has image_url, audio_url, video_url, filename …)
+  const resultData = {};
+  const generated  = new Set();
+  let   loadingIdx = null;
+
+  async function init() {
+    const [phrasesRes, generatedRes] = await Promise.all([
+      fetch("/phrases"),
+      fetch("/generated"),
+    ]);
+    const phrases   = await phrasesRes.json();
+    const restored  = await generatedRes.json();
+
+    renderPhraseList(phrases);
+
+    if (restored.length > 0) {
+      hide("empty-state");
+      // Prepend in reverse so index-ascending order reads top-to-bottom
+      for (const d of [...restored].reverse()) {
+        resultData[d.index] = d;
+        generated.add(d.index);
+        prependResult(d.index, d);
+        markDone(d.index);
+      }
+    }
+  }
+
+  function renderPhraseList(phrases) {
+    document.getElementById("count-label").textContent =
+      `${phrases.length} phrase${phrases.length !== 1 ? "s" : ""}`;
+    const list = document.getElementById("phrase-list");
+    list.innerHTML = "";
+    phrases.forEach((p, i) => {
+      const el = document.createElement("div");
+      el.className     = "phrase-item";
+      el.dataset.index = i;
+      el.innerHTML = `
+        <div class="phrase-num">${p.number}</div>
+        <div class="phrase-meta">
+          <div class="phrase-name">${esc(p.phrase)}</div>
+          ${p.translation ? `<div class="phrase-trans">${esc(p.translation)}</div>` : ""}
+        </div>
+        <span class="done-badge">✓</span>`;
+      el.addEventListener("click", () => handleClick(i));
+      list.appendChild(el);
+    });
+  }
+
+  function handleClick(idx) {
+    if (loadingIdx !== null) return;
+    if (generated.has(idx)) {
+      document.getElementById(`result-${idx}`)
+        .scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    generate(idx);
+  }
+
+  async function generate(idx) {
+    loadingIdx = idx;
+    document.querySelectorAll(".phrase-item").forEach(el => {
+      el.classList.remove("active");
+      el.classList.toggle("loading", +el.dataset.index === idx);
+    });
+    document.querySelector(`[data-index="${idx}"]`).classList.add("active");
+
+    hideError();
+    showSpinner(`Generating image, audio & video for phrase #${idx + 1}…`);
+
+    try {
+      const res  = await fetch("/generate", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ index: idx }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || "Server error");
+
+      resultData[idx] = data;
+      generated.add(idx);
+      hide("empty-state");
+      prependResult(idx, data);
+      markDone(idx);
+
+    } catch (err) {
+      showError(err.message);
+      document.querySelector(`[data-index="${idx}"]`).classList.remove("loading", "active");
+    } finally {
+      hideSpinner();
+      loadingIdx = null;
+    }
+  }
+
+  function prependResult(idx, d) {
+    const container = document.getElementById("results-container");
+    const block = document.createElement("div");
+    block.className = "result-block";
+    block.id        = `result-${idx}`;
+    block.innerHTML = `
+      <div class="result-block-header">
+        <div>
+          <div class="result-phrase">&ldquo;${esc(d.phrase)}&rdquo;</div>
+          ${d.translation ? `<div class="result-trans">(${esc(d.translation)})</div>` : ""}
+        </div>
+        <span class="result-num">#${String(d.number).padStart(2,"0")}</span>
+      </div>
+
+      <div class="card">
+        <div class="card-toolbar">
+          <span class="card-title">Image &middot; 1080 &times; 1440</span>
+          <button class="btn btn-dl" onclick="dl(${idx},'image')">&#8681; PNG</button>
+        </div>
+        <img class="phrase-img" src="${d.image_url}" alt="${esc(d.phrase)}" />
+      </div>
+
+      <div class="card">
+        <div class="card-toolbar">
+          <span class="card-title">Audio</span>
+          <button class="btn btn-dl" onclick="dl(${idx},'audio')">&#8681; MP3</button>
+        </div>
+        <audio controls preload="auto" src="${d.audio_url}"></audio>
+      </div>
+
+      <div class="card">
+        <div class="card-toolbar">
+          <span class="card-title">Video &middot; 1080 &times; 1440</span>
+          <button class="btn btn-dl" onclick="dl(${idx},'video')">&#8681; MP4</button>
+        </div>
+        <video class="phrase-vid" controls preload="auto" src="${d.video_url}"></video>
+      </div>`;
+
+    container.prepend(block);
+    block.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function markDone(idx) {
+    const el = document.querySelector(`[data-index="${idx}"]`);
+    if (el) el.classList.remove("loading", "active"), el.classList.add("done");
+  }
+
+  function dl(idx, type) {
+    const d   = resultData[idx];
+    const map = { image: [d.image_url, `${d.filename}.png`],
+                  audio: [d.audio_url, `${d.filename}.mp3`],
+                  video: [d.video_url, `${d.filename}.mp4`] };
+    const [url, name] = map[type];
+    const a = Object.assign(document.createElement("a"), { href: url, download: name });
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  }
+
+  function showSpinner(msg) {
+    document.getElementById("spinner-msg").textContent = msg;
+    document.getElementById("spinner").style.display = "flex";
+  }
+  function hideSpinner() { document.getElementById("spinner").style.display = "none"; }
+  function showError(msg) {
+    const el = document.getElementById("error-box");
+    el.textContent = `Error: ${msg}`; el.style.display = "block";
+  }
+  function hideError() { document.getElementById("error-box").style.display = "none"; }
+  function hide(id)    { document.getElementById(id).style.display = "none"; }
+  function esc(s) {
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  init();
+</script>
+</body>
+</html>
