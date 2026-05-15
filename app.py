@@ -1,6 +1,7 @@
 import os
 import io
 import re
+import difflib
 import zipfile
 import threading
 import subprocess
@@ -81,17 +82,74 @@ def wrap_text(draw: ImageDraw.ImageDraw, text: str, font, max_width: int) -> lis
     return lines
 
 
+# ── Phrase span finder (exact + fuzzy + stemming) ────────────────────────────
+
+# Ordered longest-first so "ings" is stripped before "s", etc.
+_STEM_SUFFIXES = ("ings", "ing", "tions", "tion", "edly", "eds", "ed",
+                  "ers", "er", "est", "es", "s", "d")
+
+def _normalize(w: str) -> str:
+    """Strip punctuation and common English inflections for fuzzy matching."""
+    w = re.sub(r"[^\w]", "", w.lower())
+    for suf in _STEM_SUFFIXES:
+        if w.endswith(suf) and len(w) - len(suf) >= 3:
+            return w[:-len(suf)]
+    return w
+
+
+def find_phrase_spans(text: str, phrase: str) -> list[tuple[int, int]]:
+    """Return character spans where phrase occurs in text."""
+    # 1. Exact match (fast path)
+    spans = [(m.start(), m.end())
+             for m in re.finditer(re.escape(phrase), text, re.IGNORECASE)]
+    if spans:
+        return spans
+
+    # 2. Fuzzy sliding-window with stemmed word comparison
+    t_words = text.split()
+    p_words = phrase.split()
+    n = len(p_words)
+    if n > len(t_words):
+        return []
+
+    # Build (char_start, char_end) for every word in text
+    word_spans: list[tuple[int, int]] = []
+    pos = 0
+    for w in t_words:
+        i = text.find(w, pos)
+        word_spans.append((i, i + len(w)))
+        pos = i + len(w)
+
+    p_norms = [_normalize(w) for w in p_words]
+    best_score, best = 0.0, None
+    for i in range(len(t_words) - n + 1):
+        score = sum(
+            difflib.SequenceMatcher(None, _normalize(t_words[i + j]), p_norms[j]).ratio()
+            for j in range(n)
+        ) / n
+        if score > best_score:
+            best_score = score
+            best = (word_spans[i][0], word_spans[i + n - 1][1])
+
+    if best_score >= 0.65 and best:
+        return [best]
+    return []
+
+
 # ── Highlighted sentence renderer ─────────────────────────────────────────────
 
-def draw_highlighted_line(draw, x, y, line, phrase, font, text_color, hl_bg, hl_fg):
-    pattern = re.compile(re.escape(phrase), re.IGNORECASE)
+def draw_highlighted_line(draw, x, y, line, spans, font, text_color, hl_bg, hl_fg):
+    if not spans:
+        draw.text((x, y), line, fill=text_color, font=font)
+        return
+
     cursor, last = x, 0
-    for m in pattern.finditer(line):
-        if m.start() > last:
-            seg = line[last:m.start()]
+    for start, end in sorted(spans):
+        if start > last:
+            seg = line[last:start]
             draw.text((cursor, y), seg, fill=text_color, font=font)
             cursor += int(draw.textlength(seg, font=font))
-        seg   = m.group()
+        seg   = line[start:end]
         seg_w = int(draw.textlength(seg, font=font))
         seg_h = draw.textbbox((0, 0), seg, font=font)[3]
         pad   = 4
@@ -101,7 +159,7 @@ def draw_highlighted_line(draw, x, y, line, phrase, font, text_color, hl_bg, hl_
         )
         draw.text((cursor, y), seg, fill=hl_fg, font=font)
         cursor += seg_w
-        last = m.end()
+        last = end
     if last < len(line):
         draw.text((cursor, y), line[last:], fill=text_color, font=font)
 
@@ -152,7 +210,7 @@ def create_image(number: int, phrase: str, translation: str, sentences: list[str
 
     phrase_font = get_font(76);  trans_font = get_cjk_font(44)
     body_font   = get_font(38);  label_font = get_font(28)
-    num_font    = get_font(26);  badge_font = get_font(24)
+    num_font    = get_font(26);  badge_font = get_font(72)
 
     t   = np.linspace(0, 1, H)[:, None, None]
     arr = (np.array(BG_TOP, float) * (1 - t) + np.array(BG_BOT, float) * t).astype(np.uint8)
@@ -160,17 +218,31 @@ def create_image(number: int, phrase: str, translation: str, sentences: list[str
     img  = Image.fromarray(arr)
     draw = ImageDraw.Draw(img)
 
-    # Number badge
+    # Number badge — bookmark shape, top-left, vivid orange-red
+    BADGE_BG  = (234, 88, 12)
     badge_txt = f"#{number:02d}"
-    bb = draw.textbbox((0, 0), badge_txt, font=badge_font)
-    bw, bh = bb[2] - bb[0] + 28, bb[3] - bb[1] + 14
-    bx1 = W - PAD - bw
-    draw.rounded_rectangle([(bx1, 52), (bx1 + bw, 52 + bh)], radius=10, fill=NUM_BG)
-    draw.text((bx1 + bw // 2, 52 + bh // 2), badge_txt, fill="white", font=badge_font, anchor="mm")
+    bb   = draw.textbbox((0, 0), badge_txt, font=badge_font)
+    tw   = bb[2] - bb[0]
+    th   = bb[3] - bb[1]
+    bm_w = tw + 52          # bookmark width
+    bm_h = th + 90          # bookmark body height (above notch)
+    notch = 40              # depth of the V cut at the bottom
+    bm_x  = PAD
+    mid_x = bm_x + bm_w // 2
 
-    # Phrase title
+    bookmark = [
+        (bm_x,          0),               # top-left  (flush with image top)
+        (bm_x + bm_w,   0),               # top-right
+        (bm_x + bm_w,   bm_h + notch),    # bottom-right
+        (mid_x,         bm_h),            # V notch point
+        (bm_x,          bm_h + notch),    # bottom-left
+    ]
+    draw.polygon(bookmark, fill=BADGE_BG)
+    draw.text((mid_x, bm_h // 2), badge_txt, fill="white", font=badge_font, anchor="mm")
+
+    # Phrase title — start below bookmark with a small gap
     probe_draw = ImageDraw.Draw(Image.new("RGB", (W, 10)))
-    y = 150
+    y = bm_h + notch + 30
     for line in wrap_text(probe_draw, f'"{phrase}"', phrase_font, W - PAD * 2):
         draw.text((W // 2, y), line, fill=GOLD, font=phrase_font, anchor="mt")
         y += 92
@@ -201,8 +273,21 @@ def create_image(number: int, phrase: str, translation: str, sentences: list[str
         cx, cy  = PAD + r_badge, slot_y + r_badge + 10
         draw.ellipse([(cx - r_badge, cy - r_badge), (cx + r_badge, cy + r_badge)], fill=NUM_BG)
         draw.text((cx, cy), str(i), fill="white", font=num_font, anchor="mm")
-        for j, ln in enumerate(wrap_text(probe_draw, sentence, body_font, W - PAD * 2 - 70)):
-            draw_highlighted_line(draw, PAD + 62, slot_y + 10 + j * LINE_H, ln, phrase, body_font, TEXT, HL_BG, HL_FG)
+        # Find spans in the full normalized sentence, then map to each wrapped line.
+        # This handles conjugated forms ("hanging out" → "hang out") via stemming
+        # and correctly splits highlights when a phrase straddles a line break.
+        norm_sent  = " ".join(sentence.split())
+        full_spans = find_phrase_spans(norm_sent, phrase)
+        lines      = wrap_text(probe_draw, sentence, body_font, W - PAD * 2 - 70)
+        ln_offset  = 0
+        for j, ln in enumerate(lines):
+            ln_end   = ln_offset + len(ln)
+            ln_spans = [
+                (max(s, ln_offset) - ln_offset, min(e, ln_end) - ln_offset)
+                for s, e in full_spans if s < ln_end and e > ln_offset
+            ]
+            draw_highlighted_line(draw, PAD + 62, slot_y + 10 + j * LINE_H, ln, ln_spans, body_font, TEXT, HL_BG, HL_FG)
+            ln_offset = ln_end + 1
         if i < len(sentences):
             div_y = slot_y + SLOT - 1
             draw.rectangle([(PAD + 62, div_y), (W - PAD, div_y + 1)], fill=DIVIDER)

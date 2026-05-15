@@ -19,6 +19,7 @@
       --muted:   #64748b;
       --danger:  #ef4444;
       --green:   #22c55e;
+      --orange:  #ea580c;
       --radius:  12px;
     }
 
@@ -33,120 +34,162 @@
       overflow: hidden;
     }
 
+    /* ── Header ── */
     header {
       flex-shrink: 0;
       display: flex;
       align-items: center;
-      padding: 14px 24px;
+      padding: 13px 24px;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
+      gap: 12px;
     }
     header h1 {
-      font-size: 1.15rem;
-      font-weight: 700;
+      font-size: 1.1rem; font-weight: 700;
       background: linear-gradient(135deg, var(--accenth), var(--gold));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    header span { color: var(--muted); font-size: .85rem; margin-left: auto; }
+    #count-label { color: var(--muted); font-size: .82rem; margin-left: auto; }
 
+    /* ── Layout ── */
     .layout { flex: 1; display: flex; overflow: hidden; }
 
-    /* ── Left panel ── */
+    /* ── Left: phrase list ── */
     .phrase-list {
-      width: 300px;
-      flex-shrink: 0;
+      width: 310px; flex-shrink: 0;
       border-right: 1px solid var(--border);
       overflow-y: auto;
       background: var(--surface);
     }
-    .phrase-list::-webkit-scrollbar { width: 6px; }
+    .phrase-list::-webkit-scrollbar { width: 5px; }
     .phrase-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
     .phrase-item {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 13px 18px;
+      gap: 10px;
+      padding: 11px 14px;
       border-bottom: 1px solid var(--border);
       cursor: pointer;
       transition: background .15s;
       user-select: none;
     }
-    .phrase-item:hover   { background: var(--surface2); }
-    .phrase-item.active  { background: #1e2b5a; border-left: 3px solid var(--accent); }
-    .phrase-item.loading { pointer-events: none; opacity: .55; }
+    .phrase-item:hover  { background: var(--surface2); }
+    .phrase-item.active { background: #1c2b5e; border-left: 3px solid var(--accent); }
 
     .phrase-num {
       flex-shrink: 0;
-      width: 30px; height: 30px;
+      width: 28px; height: 28px;
       background: #2e3a6e;
-      border-radius: 8px;
+      border-radius: 7px;
       display: flex; align-items: center; justify-content: center;
-      font-size: .75rem; font-weight: 700; color: var(--accenth);
+      font-size: .72rem; font-weight: 700; color: var(--accenth);
     }
     .phrase-item.active .phrase-num { background: var(--accent); color: #fff; }
     .phrase-item.done   .phrase-num { background: #14532d; color: var(--green); }
 
     .phrase-meta { overflow: hidden; flex: 1; }
     .phrase-name {
-      font-size: .88rem; font-weight: 600;
+      font-size: .86rem; font-weight: 600;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .phrase-trans {
-      font-size: .73rem; color: var(--muted);
+      font-size: .71rem; color: var(--muted);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      margin-top: 2px;
+      margin-top: 1px;
     }
-    .done-badge { flex-shrink: 0; font-size: .7rem; color: var(--green); display: none; }
-    .phrase-item.done .done-badge { display: block; }
 
-    /* ── Right panel ── */
-    .result-panel {
+    /* Generate button per phrase */
+    .btn-gen {
+      flex-shrink: 0;
+      border: none;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform .1s, background .15s;
+    }
+    .btn-gen:active { transform: scale(.9); }
+
+    .btn-gen.pending {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: var(--accent); color: #fff;
+      font-size: .78rem;
+    }
+    .btn-gen.pending:hover { background: var(--accenth); }
+
+    .btn-gen.done {
+      height: 26px;
+      border-radius: 6px;
+      padding: 0 9px;
+      font-size: .7rem; font-weight: 600;
+      white-space: nowrap;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--accenth);
+    }
+    .btn-gen.done:hover { border-color: var(--accent); color: #fff; background: #1c2b5e; }
+
+    .btn-gen.loading {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 2px solid var(--border);
+      cursor: not-allowed;
+    }
+    .btn-gen.loading::after {
+      content: '';
+      width: 12px; height: 12px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Right: detail panel ── */
+    .detail-panel {
       flex: 1;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
+      align-items: center;
     }
-    .result-panel::-webkit-scrollbar { width: 6px; }
-    .result-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    .detail-panel::-webkit-scrollbar { width: 5px; }
+    .detail-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
-    .spinner-wrap {
+    /* Spinner bar */
+    .spinner-bar {
       display: none;
       align-items: center;
-      gap: 14px;
-      padding: 16px 24px;
+      gap: 12px;
+      width: 100%;
+      padding: 14px 24px;
       background: var(--surface2);
       border-bottom: 1px solid var(--border);
       color: var(--muted);
-      font-size: .9rem;
+      font-size: .88rem;
       flex-shrink: 0;
     }
-    .spinner {
-      flex-shrink: 0;
-      width: 20px; height: 20px;
+    .spinner-dot {
+      width: 18px; height: 18px; flex-shrink: 0;
       border: 2px solid var(--border);
       border-top-color: var(--accent);
       border-radius: 50%;
       animation: spin .7s linear infinite;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
 
     .empty-state {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      color: var(--muted);
-      font-size: .9rem;
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 10px; color: var(--muted); font-size: .9rem;
     }
-    .empty-icon { font-size: 2.8rem; opacity: .35; }
+    .empty-icon { font-size: 3rem; opacity: .3; }
 
     .error-box {
-      margin: 16px 24px 0;
+      width: 100%; max-width: 800px;
+      margin: 16px 0 0;
       background: #1f0707;
       border: 1px solid var(--danger);
       border-radius: var(--radius);
@@ -156,31 +199,40 @@
       display: none;
     }
 
-    /* ── Result blocks ── */
-    #results-container { display: flex; flex-direction: column; }
-
-    .result-block {
-      border-bottom: 2px solid var(--border);
-      padding: 24px;
-      display: flex;
+    /* ── Detail view ── */
+    #phrase-detail {
+      display: none;
       flex-direction: column;
-      gap: 16px;
+      width: 100%;
+      max-width: 840px;
+      padding: 28px 24px 60px;
+      gap: 18px;
     }
-    .result-block-header {
+
+    .detail-header {
       display: flex;
-      align-items: flex-end;
+      align-items: flex-start;
       justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border);
     }
-    .result-phrase { font-size: 1.25rem; font-weight: 700; color: var(--gold); }
-    .result-trans  { font-size: .88rem; color: #93c5fd; margin-top: 3px; }
-    .result-num {
-      font-size: .75rem; color: var(--muted);
+    .detail-title {
+      font-size: 1.6rem; font-weight: 700; color: var(--gold);
+      line-height: 1.2;
+    }
+    .detail-trans { font-size: .95rem; color: #93c5fd; margin-top: 4px; }
+    .detail-num {
+      flex-shrink: 0;
+      font-size: .78rem; color: var(--muted);
       background: var(--surface2);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 3px 10px;
+      border-radius: 8px;
+      padding: 5px 12px;
+      margin-top: 4px;
     }
 
+    /* Cards */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -188,25 +240,25 @@
       padding: 16px 20px;
     }
     .card-toolbar {
-      display: flex;
-      align-items: center;
+      display: flex; align-items: center;
       justify-content: space-between;
       margin-bottom: 12px;
     }
-    .card-title {
-      font-size: .72rem; font-weight: 700;
+    .card-label {
+      font-size: .7rem; font-weight: 700;
       text-transform: uppercase; letter-spacing: .08em;
       color: var(--muted);
     }
 
-    img.phrase-img   { width: 100%; border-radius: 8px; display: block; }
-    video.phrase-vid { width: 100%; border-radius: 8px; display: block; background: #000; }
-    audio            { width: 100%; accent-color: var(--accent); border-radius: 6px; }
+    img.detail-img   { width: 100%; border-radius: 8px; display: block; }
+    video.detail-vid { width: 100%; border-radius: 8px; display: block; background: #000; }
+    audio            { width: 100%; accent-color: var(--accent); }
 
+    /* Buttons */
     .btn {
       cursor: pointer; border: none; border-radius: 8px;
       font-size: .82rem; font-weight: 600; padding: 7px 16px;
-      transition: opacity .15s, transform .1s;
+      transition: transform .1s;
     }
     .btn:active { transform: scale(.97); }
     .btn-dl {
@@ -215,6 +267,13 @@
       color: var(--text);
     }
     .btn-dl:hover { border-color: var(--accent); color: var(--accenth); }
+    .btn-zip {
+      background: #1e3a5f;
+      border: 1px solid #2e4a8f;
+      color: #93c5fd;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-zip:hover { border-color: var(--accenth); color: var(--accenth); }
   </style>
 </head>
 <body>
@@ -225,11 +284,15 @@
 </header>
 
 <div class="layout">
+
+  <!-- Left: phrase list -->
   <div class="phrase-list" id="phrase-list"></div>
 
-  <div class="result-panel">
-    <div class="spinner-wrap" id="spinner">
-      <div class="spinner"></div>
+  <!-- Right: detail panel -->
+  <div class="detail-panel">
+
+    <div class="spinner-bar" id="spinner">
+      <div class="spinner-dot"></div>
       <span id="spinner-msg">Generating…</span>
     </div>
 
@@ -237,46 +300,86 @@
 
     <div class="empty-state" id="empty-state">
       <div class="empty-icon">📖</div>
-      <div>Select a phrase to generate its card, audio and video</div>
+      <div>Click <strong>▶</strong> next to a phrase to generate its card</div>
     </div>
 
-    <div id="results-container"></div>
+    <div id="phrase-detail">
+      <div class="detail-header">
+        <div>
+          <div class="detail-title" id="d-phrase"></div>
+          <div class="detail-trans"  id="d-trans"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+          <span class="detail-num" id="d-num"></span>
+          <button class="btn btn-zip" id="d-zip-btn" onclick="dlZip()">&#8681; Download ZIP</button>
+        </div>
+      </div>
+
+      <!-- Image -->
+      <div class="card">
+        <div class="card-toolbar">
+          <span class="card-label">Image &middot; 1080 &times; 1440</span>
+          <button class="btn btn-dl" onclick="dl('image')">&#8681; PNG</button>
+        </div>
+        <img class="detail-img" id="d-img" alt="" />
+      </div>
+
+      <!-- Audio -->
+      <div class="card">
+        <div class="card-toolbar">
+          <span class="card-label">Audio</span>
+          <button class="btn btn-dl" onclick="dl('audio')">&#8681; MP3</button>
+        </div>
+        <audio id="d-audio" controls preload="auto"></audio>
+      </div>
+
+      <!-- Video -->
+      <div class="card">
+        <div class="card-toolbar">
+          <span class="card-label">Video &middot; 1080 &times; 1440</span>
+          <button class="btn btn-dl" onclick="dl('video')">&#8681; MP4</button>
+        </div>
+        <video class="detail-vid" id="d-video" controls preload="auto"></video>
+      </div>
+    </div>
+
   </div>
 </div>
 
 <script>
-  // idx → server response object (has image_url, audio_url, video_url, filename …)
+  // idx → server response {phrase, translation, number, filename, image_url, audio_url, video_url}
   const resultData = {};
   const generated  = new Set();
+  let   currentIdx = null;
   let   loadingIdx = null;
 
   async function init() {
-    const [phrasesRes, generatedRes] = await Promise.all([
-      fetch("/phrases"),
-      fetch("/generated"),
-    ]);
-    const phrases   = await phrasesRes.json();
-    const restored  = await generatedRes.json();
+    const [pr, gr] = await Promise.all([fetch("/phrases"), fetch("/generated")]);
+    const phrases  = await pr.json();
+    const restored = await gr.json();
 
-    renderPhraseList(phrases);
+    renderList(phrases);
 
+    for (const d of restored) {
+      resultData[d.index] = d;
+      generated.add(d.index);
+      setGenBtn(d.index, "done");
+    }
+
+    // Show most recently generated (highest index) if any
     if (restored.length > 0) {
-      hide("empty-state");
-      // Prepend in reverse so index-ascending order reads top-to-bottom
-      for (const d of [...restored].reverse()) {
-        resultData[d.index] = d;
-        generated.add(d.index);
-        prependResult(d.index, d);
-        markDone(d.index);
-      }
+      const last = restored.reduce((a, b) => (a.number > b.number ? a : b));
+      showDetail(last.index);
     }
   }
 
-  function renderPhraseList(phrases) {
+  function renderList(phrases) {
     document.getElementById("count-label").textContent =
       `${phrases.length} phrase${phrases.length !== 1 ? "s" : ""}`;
+
     const list = document.getElementById("phrase-list");
     list.innerHTML = "";
+
     phrases.forEach((p, i) => {
       const el = document.createElement("div");
       el.className     = "phrase-item";
@@ -287,116 +390,114 @@
           <div class="phrase-name">${esc(p.phrase)}</div>
           ${p.translation ? `<div class="phrase-trans">${esc(p.translation)}</div>` : ""}
         </div>
-        <span class="done-badge">✓</span>`;
-      el.addEventListener("click", () => handleClick(i));
+        <button class="btn-gen pending" id="gen-btn-${i}"
+                title="Generate" onclick="handleGenBtn(event,${i})">&#9654;</button>`;
+
+      // Clicking the row (not the button) navigates to detail if generated
+      el.addEventListener("click", (e) => {
+        if (e.target.closest(".btn-gen")) return;
+        if (generated.has(i)) showDetail(i);
+      });
+
       list.appendChild(el);
     });
   }
 
-  function handleClick(idx) {
+  function handleGenBtn(e, idx) {
+    e.stopPropagation();
     if (loadingIdx !== null) return;
-    if (generated.has(idx)) {
-      document.getElementById(`result-${idx}`)
-        .scrollIntoView({ behavior: "smooth", block: "start" });
-      return;
-    }
     generate(idx);
   }
 
   async function generate(idx) {
     loadingIdx = idx;
-    document.querySelectorAll(".phrase-item").forEach(el => {
-      el.classList.remove("active");
-      el.classList.toggle("loading", +el.dataset.index === idx);
-    });
-    document.querySelector(`[data-index="${idx}"]`).classList.add("active");
-
+    setGenBtn(idx, "loading");
     hideError();
     showSpinner(`Generating image, audio & video for phrase #${idx + 1}…`);
 
+    // Keep detail panel showing last result while loading
+    if (currentIdx === null) {
+      hide("empty-state");
+      hide("phrase-detail");
+    }
+
     try {
       const res  = await fetch("/generate", {
-        method:  "POST",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ index: idx }),
+        body: JSON.stringify({ index: idx }),
       });
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || "Server error");
 
       resultData[idx] = data;
       generated.add(idx);
-      hide("empty-state");
-      prependResult(idx, data);
-      markDone(idx);
+      setGenBtn(idx, "done");
+      showDetail(idx);
 
-      // Auto-download zip of image + audio + video
-      const a = Object.assign(document.createElement("a"), {
-        href: `/zip/${idx}`, download: `${data.filename}.zip`,
-      });
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      // Auto-download zip
+      triggerDownload(`/zip/${idx}`, `${data.filename}.zip`);
 
     } catch (err) {
       showError(err.message);
-      document.querySelector(`[data-index="${idx}"]`).classList.remove("loading", "active");
+      setGenBtn(idx, "pending");
+      if (currentIdx === null) show("empty-state");
     } finally {
       hideSpinner();
       loadingIdx = null;
     }
   }
 
-  function prependResult(idx, d) {
-    const container = document.getElementById("results-container");
-    const block = document.createElement("div");
-    block.className = "result-block";
-    block.id        = `result-${idx}`;
-    block.innerHTML = `
-      <div class="result-block-header">
-        <div>
-          <div class="result-phrase">&ldquo;${esc(d.phrase)}&rdquo;</div>
-          ${d.translation ? `<div class="result-trans">(${esc(d.translation)})</div>` : ""}
-        </div>
-        <span class="result-num">#${String(d.number).padStart(2,"0")}</span>
-      </div>
+  function showDetail(idx) {
+    const d = resultData[idx];
+    if (!d) return;
+    currentIdx = idx;
 
-      <div class="card">
-        <div class="card-toolbar">
-          <span class="card-title">Image &middot; 1080 &times; 1440</span>
-          <button class="btn btn-dl" onclick="dl(${idx},'image')">&#8681; PNG</button>
-        </div>
-        <img class="phrase-img" src="${d.image_url}" alt="${esc(d.phrase)}" />
-      </div>
+    document.getElementById("d-phrase").textContent = `"${d.phrase}"`;
+    document.getElementById("d-trans").textContent  = d.translation ? `(${d.translation})` : "";
+    document.getElementById("d-num").textContent    = `#${String(d.number).padStart(2, "0")}`;
+    document.getElementById("d-img").src            = d.image_url;
+    document.getElementById("d-audio").src          = d.audio_url;
+    document.getElementById("d-video").src          = d.video_url;
 
-      <div class="card">
-        <div class="card-toolbar">
-          <span class="card-title">Audio</span>
-          <button class="btn btn-dl" onclick="dl(${idx},'audio')">&#8681; MP3</button>
-        </div>
-        <audio controls preload="auto" src="${d.audio_url}"></audio>
-      </div>
+    hide("empty-state");
+    document.getElementById("phrase-detail").style.display = "flex";
 
-      <div class="card">
-        <div class="card-toolbar">
-          <span class="card-title">Video &middot; 1080 &times; 1440</span>
-          <button class="btn btn-dl" onclick="dl(${idx},'video')">&#8681; MP4</button>
-        </div>
-        <video class="phrase-vid" controls preload="auto" src="${d.video_url}"></video>
-      </div>`;
-
-    container.prepend(block);
-    block.scrollIntoView({ behavior: "smooth", block: "start" });
+    // Highlight active in list
+    document.querySelectorAll(".phrase-item").forEach(el => {
+      const active = +el.dataset.index === idx;
+      el.classList.toggle("active", active);
+      if (active) el.classList.add("done");
+    });
   }
 
-  function markDone(idx) {
-    const el = document.querySelector(`[data-index="${idx}"]`);
-    if (el) el.classList.remove("loading", "active"), el.classList.add("done");
+  function setGenBtn(idx, state) {
+    const btn = document.getElementById(`gen-btn-${idx}`);
+    if (!btn) return;
+    btn.className = `btn-gen ${state}`;
+    if (state === "pending")  { btn.innerHTML = "&#9654;"; btn.title = "Generate"; }
+    if (state === "done")     { btn.innerHTML = "&#8635; Regenerate"; btn.title = "Regenerate"; }
+    if (state === "loading")  { btn.innerHTML = ""; btn.title = "Generating…"; }
   }
 
-  function dl(idx, type) {
-    const d   = resultData[idx];
-    const map = { image: [d.image_url, `${d.filename}.png`],
-                  audio: [d.audio_url, `${d.filename}.mp3`],
-                  video: [d.video_url, `${d.filename}.mp4`] };
-    const [url, name] = map[type];
+  function dl(type) {
+    if (currentIdx === null) return;
+    const d = resultData[currentIdx];
+    const map = {
+      image: [d.image_url, `${d.filename}.png`],
+      audio: [d.audio_url, `${d.filename}.mp3`],
+      video: [d.video_url, `${d.filename}.mp4`],
+    };
+    triggerDownload(...map[type]);
+  }
+
+  function dlZip() {
+    if (currentIdx === null) return;
+    const d = resultData[currentIdx];
+    triggerDownload(`/zip/${currentIdx}`, `${d.filename}.zip`);
+  }
+
+  function triggerDownload(url, name) {
     const a = Object.assign(document.createElement("a"), { href: url, download: name });
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
   }
@@ -411,8 +512,9 @@
     el.textContent = `Error: ${msg}`; el.style.display = "block";
   }
   function hideError() { document.getElementById("error-box").style.display = "none"; }
-  function hide(id)    { document.getElementById(id).style.display = "none"; }
-  function esc(s) {
+  function show(id)  { document.getElementById(id).style.display = "flex"; }
+  function hide(id)  { document.getElementById(id).style.display = "none"; }
+  function esc(s)    {
     return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
   }
 
