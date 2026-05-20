@@ -151,3 +151,158 @@ I try to keep in touch with my old friends from college.
 It’s hard to keep in touch when everyone is so busy.
 
 Goodbye! Make sure to keep in touch!
+
+
+15. Show up (露面/出现/到场)
+I waited for an hour, but he didn't show up.
+
+What time do we need to show up for the party?
+
+She always shows up late when we meet for dinner.
+
+More than fifty people showed up for the meeting.
+
+Don't worry, I'm sure everything will show up eventually.
+
+16. Count someone in / out (把某人算进去 / 别算我)
+If you guys are going to the movies, count me in!
+
+I’m too tired to go hiking, so count me out this time.
+
+Please count me in for the team dinner tomorrow.
+
+If there is free food, you can always count him in.
+
+I don’t really like singing, so you can count me out for karaoke.
+
+17. Deal with (处理/应付)
+I have a lot of emails to deal with this morning.
+
+How do you deal with difficult customers at work?
+
+Don’t worry, I will deal with this problem later.
+
+She is currently dealing with a cold, so she’s resting.
+
+It’s hard to deal with this noisy traffic every day.
+
+18. End up (最终变成/结果是)
+We got lost and ended up in a completely different town.
+
+If you don’t study, you’ll end up failing the exam.
+
+I went to the store for milk but ended up buying a cake.
+
+They argued all night but ended up laughing about it.
+
+We thought it would rain, but it ended up being a sunny day.
+
+19. Cheer someone up (让某人高兴起来)
+I bought her some flowers to cheer her up.
+
+Smile! I’m trying to cheer you up.
+
+A good movie always cheers me up when I’m sad.
+
+He told a funny joke to cheer up his crying son.
+
+We went out for ice cream to cheer ourselves up.
+
+20. By the way (顺便说一下)
+By the way, what time is the meeting tomorrow?
+
+I really like your shoes, by the way.
+
+By the way, did you remember to lock the door?
+
+I met your brother yesterday, by the way.
+
+By the way, thanks for helping me with the move.
+
+21. Calm down (冷静下来)
+Please calm down and tell me what happened.
+
+Take a deep breath and try to calm down.
+
+The teacher told the excited students to calm down.
+
+It took him a long time to calm down after the argument.
+
+Don’t get angry, just calm down.
+
+22. Mess up (搞砸了/弄乱了)
+I’m so sorry, I really messed up the presentation.
+
+Don’t worry about the mistake; everyone messes up sometimes.
+
+The wind completely messed up my hair.
+
+I don’t want to mess up my chance to get this job.
+
+Who messed up the kitchen right after I cleaned it?
+
+23. Change one’s mind (改变主意)
+I was going to go out, but I changed my mind because of the rain.
+
+Has he changed his mind about selling his car?
+
+You can always change your mind if you don’t like the color.
+
+She changed her mind at the last minute and stayed home.
+
+If you change your mind, just let me know.
+
+24. Look for (寻找)
+What are you looking for under the table?
+
+I’m looking for a new job in the tech industry.
+
+Can you help me look for my keys?
+
+She is looking for a comfortable place to live.
+
+I’m just looking for the nearest restroom.
+
+25. Go ahead (开始做/尽管做/继续)
+If you are ready, please go ahead and start.
+
+Can I use your pen? — Yes, go ahead.
+
+Go ahead with your story, I’m listening.
+
+The manager gave us the green light to go ahead with the project.
+
+Don’t wait for me, go ahead and eat dinner.
+
+26. Sleep in (赖床/睡懒觉)
+I love to sleep in on Sunday mornings.
+
+I accidentally slept in and missed my bus.
+
+Since tomorrow is a holiday, I’m going to sleep in.
+
+We usually sleep in until 10 AM on weekends.
+
+I rarely get to sleep in because of my kids.
+
+27. Pick up (接电话/顺便买/接人)
+Why aren’t you picking up your phone?
+
+Can you pick up some bread on your way home?
+
+I need to pick up my daughter from school at 3 PM.
+
+He picked up a lot of useful skills during the project.
+
+I’ll pick you up at the station around noon.
+
+28. In a rush / hurry (赶时间/匆忙)
+I can’t talk right now; I’m in a rush.
+
+Why are you in such a hurry to leave?
+
+Sorry, I made a mistake because I was in a rush.
+
+She left the office in a hurry after getting the call.
+
+We need to eat quickly; we are in a bit of a rush.

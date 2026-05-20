@@ -315,6 +315,15 @@
         </div>
       </div>
 
+      <!-- Video -->
+      <div class="card">
+        <div class="card-toolbar">
+          <span class="card-label">Video &middot; 1080 &times; 1440</span>
+          <button class="btn btn-dl" onclick="dl('video')">&#8681; MP4</button>
+        </div>
+        <video class="detail-vid" id="d-video" controls preload="auto"></video>
+      </div>
+
       <!-- Image -->
       <div class="card">
         <div class="card-toolbar">
@@ -331,15 +340,6 @@
           <button class="btn btn-dl" onclick="dl('audio')">&#8681; MP3</button>
         </div>
         <audio id="d-audio" controls preload="auto"></audio>
-      </div>
-
-      <!-- Video -->
-      <div class="card">
-        <div class="card-toolbar">
-          <span class="card-label">Video &middot; 1080 &times; 1440</span>
-          <button class="btn btn-dl" onclick="dl('video')">&#8681; MP4</button>
-        </div>
-        <video class="detail-vid" id="d-video" controls preload="auto"></video>
       </div>
     </div>
 
@@ -435,8 +435,7 @@
       setGenBtn(idx, "done");
       showDetail(idx);
 
-      // Auto-download zip
-      triggerDownload(`/zip/${idx}`, `${data.filename}.zip`);
+      triggerDownload(data.video_url, `${data.filename}.mp4`);
 
     } catch (err) {
       showError(err.message);

@@ -13,7 +13,9 @@
       "PowerShell(ffmpeg -version 2>&1)",
       "PowerShell(pip install pydub --quiet)",
       "PowerShell(python -c \"from pydub import AudioSegment; print\\('pydub OK'\\)\")",
-      "PowerShell(New-Item -ItemType Directory -Force \"d:\\\\Source Code\\\\EnglishAudioImage\\\\static\\\\generated\")"
+      "PowerShell(New-Item -ItemType Directory -Force \"d:\\\\Source Code\\\\EnglishAudioImage\\\\static\\\\generated\")",
+      "Bash(python app.py)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5000/)"
     ]
   }
 }
